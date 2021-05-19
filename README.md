@@ -13,3 +13,5 @@ Homework assignments for Web Programming course at the Faculty of Computing (RAF
 - Homework 5 - JSP and Servlet API
 
 - Homework 6 - JSP and JSTL
+
+- Homework 7 - RESTfull API using JAX-RS
