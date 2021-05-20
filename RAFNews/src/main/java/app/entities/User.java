@@ -1,13 +1,22 @@
 package app.entities;
 
+import com.google.gson.annotations.Expose;
+
 public class User {
 
+    @Expose
     private Integer id;
+    @Expose
     private String email;
+    @Expose
     private String name;
+    @Expose
     private String surname;
+    @Expose
     private String role;
+    @Expose
     private String status;
+    @Expose(serialize = false)
     private String password;
 
     public User() {

@@ -1,13 +1,29 @@
 package app;
 
+import app.controllers.LoginController;
+import app.controllers.UserController;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import static spark.Spark.*;
 
 public class Application {
+
+    public static Gson gson = new GsonBuilder()
+            .excludeFieldsWithoutExposeAnnotation()
+            .create();
 
     public static void main(String[] args) {
 
         port(8080);
         enableCORS();
+        path("/api", () -> {
+            path("/user", () -> {
+                post("/add", UserController.addUser);
+                post("/login", LoginController.login);
+                get("/admintest", LoginController.adminTest);
+            });
+        });
 
     }
 
