@@ -1,9 +1,14 @@
 package app.entities;
 
+import com.google.gson.annotations.Expose;
+
 public class Category {
 
+    @Expose
     private Integer id;
+    @Expose
     private String categoryName;
+    @Expose
     private String categoryDescription;
 
     public Category() {
