@@ -22,6 +22,7 @@ public class Application {
                 post("/add", UserController.addUser);
                 post("/login", LoginController.login);
                 get("/admintest", LoginController.adminTest);
+                get("/authtest", LoginController.authTest);
             });
         });
 

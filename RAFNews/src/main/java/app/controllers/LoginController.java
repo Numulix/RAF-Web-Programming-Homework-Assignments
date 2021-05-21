@@ -39,4 +39,15 @@ public class LoginController {
         return AuthService.isAdmin(header);
     };
 
+    public static Route authTest = (Request req, Response res) -> {
+        String header = req.headers("Authorization");
+
+        if (UtilMethods.isEmpty(header)) {
+            res.status(403);
+            return "Unauthorized";
+        }
+
+        return AuthService.isAuthorized(header);
+    };
+
 }

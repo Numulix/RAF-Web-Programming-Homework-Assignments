@@ -42,4 +42,19 @@ public class AuthService {
         return false;
     }
 
+    public static boolean isAuthorized(String token) {
+        if (!UtilMethods.isEmpty(token) && token.contains("Bearer ")) {
+            String jwt = token.split(" ")[1];
+            try {
+                Jws<Claims> claims = Jwts.parser().setSigningKey(key).parseClaimsJws(jwt);
+                return claims.getBody().get("role").equals("CONTENT_CREATOR")
+                        || claims.getBody().get("role").equals("ADMIN");
+            } catch (Exception e) {
+                return false;
+            }
+        }
+
+        return false;
+    }
+
 }
