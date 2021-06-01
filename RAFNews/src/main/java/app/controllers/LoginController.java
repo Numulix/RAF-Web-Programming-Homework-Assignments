@@ -45,9 +45,16 @@ public class LoginController {
 
         if (UtilMethods.isEmpty(header)) {
             res.status(403);
-            return "Unauthorized";
+            return new Gson().toJson(
+                    new JSONResponseObject("ERROR", "Unauthorized")
+            );
         }
-        return AuthService.isAdmin(header);
+
+        JsonObject o = new JsonObject();
+        o.addProperty("isAdmin", AuthService.isAdmin(header));
+        return new Gson().toJson(
+                new JSONResponseObject("SUCCESS", o)
+        );
     };
 
     public static Route authTest = (Request req, Response res) -> {
@@ -55,10 +62,16 @@ public class LoginController {
 
         if (UtilMethods.isEmpty(header)) {
             res.status(403);
-            return "Unauthorized";
+            return new Gson().toJson(
+                    new JSONResponseObject("ERROR", "Unauthorized")
+            );
         }
 
-        return AuthService.isAuthorized(header);
+        JsonObject o = new JsonObject();
+        o.addProperty("isAdmin", AuthService.isAuthorized(header));
+        return new Gson().toJson(
+                new JSONResponseObject("SUCCESS", o)
+        );
     };
 
 }

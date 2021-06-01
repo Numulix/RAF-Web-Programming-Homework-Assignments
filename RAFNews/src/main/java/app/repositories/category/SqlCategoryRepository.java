@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 public class SqlCategoryRepository extends MySqlAbstractRepository implements CategoryRepository {
 
@@ -44,12 +45,68 @@ public class SqlCategoryRepository extends MySqlAbstractRepository implements Ca
     }
 
     @Override
-    public void deleteCategory(Integer id) {
+    public boolean deleteCategory(Integer id) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
 
+        try {
+            connection = newConnection();
+
+            preparedStatement = connection.prepareStatement(
+                    "SELECT * FROM article WHERE category_id = ?"
+            );
+            preparedStatement.setInt(1, id);
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                closeStatement(preparedStatement);
+                closeResultSet(resultSet);
+                closeConnection(connection);
+                return false;
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            closeStatement(preparedStatement);
+            closeResultSet(resultSet);
+            closeConnection(connection);
+        }
+
+        return true;
     }
 
     @Override
     public Category updateCategory(Category category) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+
+        try {
+            connection = newConnection();
+
+            preparedStatement = connection.prepareStatement(
+                    "UPDATE category SET category_name = ?, cat_description = ? WHERE id = ?"
+            );
+            preparedStatement.setString(1, category.getCategoryName());
+            preparedStatement.setString(2, category.getCategoryDescription());
+            preparedStatement.setInt(3, category.getId());
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            closeStatement(preparedStatement);
+            closeConnection(connection);
+        }
+
+        return category;
+    }
+
+    @Override
+    public List<Category> allCategories() {
+        return null;
+    }
+
+    @Override
+    public Category getSingleCategory(Integer id) {
         return null;
     }
 }

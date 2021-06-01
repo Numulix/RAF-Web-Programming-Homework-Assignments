@@ -1,5 +1,6 @@
 package app;
 
+import app.controllers.CategoryController;
 import app.controllers.LoginController;
 import app.controllers.UserController;
 import com.google.gson.Gson;
@@ -24,6 +25,12 @@ public class Application {
                 get("/admintest", LoginController.adminTest);
                 get("/authtest", LoginController.authTest);
             });
+
+            post("/category", CategoryController.addCategory);
+            delete("/category/:id", CategoryController.deleteCategory);
+            put("/category/:id", CategoryController.updateCategory);
+            get("/category", CategoryController.allCategories);
+            get("/category/:id", CategoryController.getSingleCategory);
         });
 
     }
