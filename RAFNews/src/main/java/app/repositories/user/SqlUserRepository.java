@@ -23,6 +23,18 @@ public class SqlUserRepository extends MySqlAbstractRepository implements UserRe
             String[] generatedColumns = {"id"};
 
             preparedStatement = connection.prepareStatement(
+                    "SELECT * FROM user WHERE email = ?"
+            );
+            preparedStatement.setString(1, user.getEmail());
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                closeResultSet(resultSet);
+                closeStatement(preparedStatement);
+                closeConnection(connection);
+                return null;
+            }
+
+            preparedStatement = connection.prepareStatement(
                     "INSERT INTO user (email, name, surname, password) VALUES (?, ?, ?, ?)",
                     generatedColumns
             );

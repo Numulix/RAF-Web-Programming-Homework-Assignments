@@ -35,23 +35,23 @@
                         </div>
                     </div>
                 </c:forEach>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col">
-                <h3>New comment</h3>
-                <form method="post">
-                    <div class="form-group">
-                        <label for="author">Author</label>
-                        <input type="text" required class="form-control" id="author" name="author">
+                </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <h3>New comment</h3>
+                        <form method="post">
+                            <div class="form-group">
+                                <label for="author">Author</label>
+                                <input type="text" required class="form-control" id="author" name="author">
+                            </div>
+                            <div class="form-group">
+                                <label for="comment">Comment</label>
+                                <textarea class="form-control" rows="4" required id="comment" name="comment"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-lg">Comment</button>
+                        </form>
                     </div>
-                    <div class="form-group">
-                        <label for="comment">Comment</label>
-                        <textarea class="form-control" rows="4" required id="comment" name="comment"></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-lg">Comment</button>
-                </form>
-            </div>
                 </c:otherwise>
             </c:choose>
 

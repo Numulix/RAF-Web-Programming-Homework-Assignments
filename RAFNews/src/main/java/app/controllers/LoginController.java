@@ -2,15 +2,21 @@ package app.controllers;
 
 import app.Application;
 import app.auth.AuthService;
+import app.entities.JwtResponse;
 import app.entities.User;
+import app.entities.response.JSONResponseObject;
 import app.services.UserService;
 import app.util.UtilMethods;
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.commons.codec.digest.DigestUtils;
 import spark.Request;
 import spark.Response;
 import spark.Route;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class LoginController {
 
@@ -22,11 +28,16 @@ public class LoginController {
 
         User user = UserService.findUser(email);
         if (user != null && user.getPassword().equals(password)) {
-            return AuthService.generateJWT(user);
+            return new Gson().toJson(
+                    new JSONResponseObject("SUCCESS",
+                            new Gson().toJsonTree(new JwtResponse(AuthService.generateJWT(user))))
+            );
         }
 
         res.status(403);
-        return "Invalid credentials";
+        return new Gson().toJson(
+                new JSONResponseObject("ERROR", "Invalid Credentials")
+        );
     };
 
     public static Route adminTest = (Request req, Response res) -> {

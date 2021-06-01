@@ -12,7 +12,7 @@
                 request.getSession().getAttribute("prijavljen").equals("DA")) {
     %>
 
-    <h1 class="col-6 mx-auto">Vas tim, <%= request.getSession().getAttribute("imeTima") %>, je vec prijavljen.</h1>
+    <h1 class="col-6 mx-auto text-center">Vas tim, <%= request.getSession().getAttribute("imeTima") %>, je vec prijavljen.</h1>
 
     <%
     } else {

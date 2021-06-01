@@ -5,6 +5,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Date;
@@ -15,10 +16,13 @@ public class CheckSubmissionServlet extends HttpServlet {
     public void init() { }
 
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String fileName = "tim_" + request.getSession().getAttribute("imeTima") + "_"
-                + new Date().toString().replace(" ", "_") + ".txt";
+        String fileName = "tim_" + request.getSession().getAttribute("imeTima") + ".txt";
+//                + new Date().toString().replace(" ", "_") + ".txt";
 
-        FileWriter writer = new FileWriter(fileName);
+        File file = new File(fileName);
+        file.createNewFile();
+
+        FileWriter writer = new FileWriter(file);
 
         writer.write("Ime tima: " + request.getSession().getAttribute("imeTima"));
         writer.write("\n\r");
