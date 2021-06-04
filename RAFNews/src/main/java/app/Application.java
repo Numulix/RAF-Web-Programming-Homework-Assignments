@@ -1,5 +1,6 @@
 package app;
 
+import app.controllers.ArticleController;
 import app.controllers.CategoryController;
 import app.controllers.LoginController;
 import app.controllers.UserController;
@@ -31,6 +32,8 @@ public class Application {
             put("/category/:id", CategoryController.updateCategory);
             get("/category", CategoryController.allCategories);
             get("/category/:id", CategoryController.getSingleCategory);
+
+            post("/article", ArticleController.addArticle);
         });
 
     }
