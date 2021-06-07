@@ -64,6 +64,12 @@ public class SqlCategoryRepository extends MySqlAbstractRepository implements Ca
                 closeConnection(connection);
                 return false;
             }
+
+            preparedStatement = connection.prepareStatement(
+                    "DELETE FROM category WHERE id = ?"
+            );
+            preparedStatement.setInt(1, id);
+            preparedStatement.executeUpdate();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {

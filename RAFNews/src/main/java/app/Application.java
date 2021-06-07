@@ -34,6 +34,9 @@ public class Application {
             get("/category/:id", CategoryController.getSingleCategory);
 
             post("/article", ArticleController.addArticle);
+            get("/article/:id", ArticleController.getSingleArticle);
+            delete("/article/:id", ArticleController.deleteArticle);
+            put("/article/:id", ArticleController.editArticle);
         });
 
     }

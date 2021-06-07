@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface ArticleRepository {
     public Article addArticle(Article article, String[] tags);
-    public Article editArticle(Article article);
+    public Article editArticle(Article article, String[] tags);
     public boolean deleteArticle(Integer id);
     public Article getSingleArticle(Integer id);
     public List<Article> getArticlesPage(Integer page);
