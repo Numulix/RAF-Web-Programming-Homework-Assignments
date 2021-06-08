@@ -21,18 +21,22 @@ import java.util.Map;
 public class LoginController {
 
     public static Route login = (Request req, Response res) -> {
+        try {
+            JsonObject object = JsonParser.parseString(req.body()).getAsJsonObject();
+            String email = object.get("email").getAsString();
+            String password = DigestUtils.sha256Hex(object.get("password").getAsString());
 
-        JsonObject object = JsonParser.parseString(req.body()).getAsJsonObject();
-        String email = object.get("email").getAsString();
-        String password = DigestUtils.sha256Hex(object.get("password").getAsString());
-
-        User user = UserService.findUser(email);
-        if (user != null && user.getPassword().equals(password)) {
-            return new Gson().toJson(
-                    new JSONResponseObject("SUCCESS",
-                            new Gson().toJsonTree(new JwtResponse(AuthService.generateJWT(user))))
-            );
+            User user = UserService.findUserByEmail(email);
+            if (user != null && user.getPassword().equals(password)) {
+                return new Gson().toJson(
+                        new JSONResponseObject("SUCCESS",
+                                new Gson().toJsonTree(new JwtResponse(AuthService.generateJWT(user))))
+                );
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
 
         res.status(403);
         return new Gson().toJson(

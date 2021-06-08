@@ -1,5 +1,8 @@
 package app.controllers;
 
+import am.ik.yavi.builder.ValidatorBuilder;
+import am.ik.yavi.core.ConstraintViolations;
+import am.ik.yavi.core.Validator;
 import app.Application;
 import app.auth.AuthService;
 import app.entities.Category;
@@ -14,8 +17,17 @@ import java.util.ArrayList;
 
 public class CategoryController {
 
+    private static Validator<Category> categoryValidator = ValidatorBuilder.<Category> of()
+            .constraint(Category::getCategoryName, "name", c -> c.notNull()
+                .notBlank()
+                .notEmpty())
+            .constraint(Category::getCategoryDescription, "description", c -> c.notNull()
+                .notEmpty()
+                .notNull())
+            .build();
+
     public static Route addCategory = (Request req, Response res) -> {
-      String header = req.headers("Authentication");
+      String header = req.headers("Authorization");
       if (header == null || !AuthService.isAuthorized(header)) {
           res.status(403);
           return new Gson().toJson(
@@ -24,6 +36,16 @@ public class CategoryController {
       }
 
       Category category = Application.gson.fromJson(req.body(), Category.class);
+
+      ConstraintViolations cv = categoryValidator.validate(category);
+        if (!cv.isValid()) {
+            StringBuilder errors = new StringBuilder();
+            cv.forEach(x -> errors.append(x.message()+"\n"));
+            return new Gson().toJson(
+                    new JSONResponseObject("ERROR", errors.toString())
+            );
+        }
+
       CategoryService.addCategory(category);
 
       return new Gson().toJson(
@@ -35,7 +57,7 @@ public class CategoryController {
     };
 
     public static Route deleteCategory = (Request req, Response res) -> {
-        String header = req.headers("Authentication");
+        String header = req.headers("Authorization");
         if (header == null || !AuthService.isAuthorized(header)) {
             res.status(403);
             return new Gson().toJson(
@@ -44,7 +66,7 @@ public class CategoryController {
         }
 
         boolean bool = CategoryService.deleteCategory(Integer.parseInt(req.params(":id")));
-
+        System.out.println(bool);
         if (bool) {
             return new Gson().toJson(
                     new JSONResponseObject("SUCCESS")
@@ -59,7 +81,7 @@ public class CategoryController {
     };
 
     public static Route updateCategory = (Request req, Response res) -> {
-        String header = req.headers("Authentication");
+        String header = req.headers("Authorization");
         if (header == null || !AuthService.isAuthorized(header)) {
             res.status(403);
             return new Gson().toJson(
@@ -68,6 +90,17 @@ public class CategoryController {
         }
 
         Category category = Application.gson.fromJson(req.body(), Category.class);
+        System.out.println(category.getCategoryName() + " " + category.getCategoryDescription());
+
+        ConstraintViolations cv = categoryValidator.validate(category);
+        if (!cv.isValid()) {
+            StringBuilder errors = new StringBuilder();
+            cv.forEach(x -> errors.append(x.message()+"\n"));
+            return new Gson().toJson(
+                    new JSONResponseObject("ERROR", errors.toString())
+            );
+        }
+
         category = CategoryService.updateCategory(category);
 
         return new Gson().toJson(

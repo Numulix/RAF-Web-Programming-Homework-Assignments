@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SqlCategoryRepository extends MySqlAbstractRepository implements CategoryRepository {
@@ -95,7 +96,7 @@ public class SqlCategoryRepository extends MySqlAbstractRepository implements Ca
             preparedStatement.setString(1, category.getCategoryName());
             preparedStatement.setString(2, category.getCategoryDescription());
             preparedStatement.setInt(3, category.getId());
-
+            preparedStatement.executeUpdate();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
@@ -108,7 +109,37 @@ public class SqlCategoryRepository extends MySqlAbstractRepository implements Ca
 
     @Override
     public List<Category> allCategories() {
-        return null;
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+
+        List<Category> categories = new ArrayList<>();
+
+        try {
+            connection = newConnection();
+
+            preparedStatement = connection.prepareStatement(
+                    "SELECT * FROM category"
+            );
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                Category toAdd = new Category();
+                toAdd.setId(resultSet.getInt("id"));
+                toAdd.setCategoryName(resultSet.getString("category_name"));
+                toAdd.setCategoryDescription(resultSet.getString("cat_description"));
+
+                categories.add(toAdd);
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            closeStatement(preparedStatement);
+            closeResultSet(resultSet);
+            closeConnection(connection);
+        }
+
+        return categories;
     }
 
     @Override

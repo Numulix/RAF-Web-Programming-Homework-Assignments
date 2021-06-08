@@ -1,12 +1,14 @@
 package app.entities;
 
+import java.util.Date;
+
 public class Comment {
 
     private Integer id;
     private Integer postId;
     private String author;
     private String content;
-    private String publishDate;
+    private Date publishDate;
 
     public Comment() {
     }
@@ -43,11 +45,11 @@ public class Comment {
         this.content = content;
     }
 
-    public String getPublishDate() {
+    public Date getPublishDate() {
         return publishDate;
     }
 
-    public void setPublishDate(String publishDate) {
+    public void setPublishDate(Date publishDate) {
         this.publishDate = publishDate;
     }
 }

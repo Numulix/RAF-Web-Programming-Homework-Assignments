@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SqlArticleRepository extends MySqlAbstractRepository implements ArticleRepository{
@@ -80,16 +81,18 @@ public class SqlArticleRepository extends MySqlAbstractRepository implements Art
             connection = newConnection();
 
             preparedStatement = connection.prepareStatement(
-                    "UPDATE article SET title = ?, content = ?, category_id = ?"
+                    "UPDATE article SET title = ?, content = ?, category_id = ? WHERE id = ?"
             );
             preparedStatement.setString(1, article.getTitle());
             preparedStatement.setString(2, article.getContent());
             preparedStatement.setInt(3, article.getCategoryId());
+            preparedStatement.setInt(4, article.getId());
             preparedStatement.executeUpdate();
 
             preparedStatement = connection.prepareStatement(
                     "DELETE FROM tag_news_article WHERE article_id = ?"
             );
+            preparedStatement.setInt(1, article.getId());
             preparedStatement.executeUpdate();
 
             for (String tag: tags) {
@@ -142,6 +145,12 @@ public class SqlArticleRepository extends MySqlAbstractRepository implements Art
             if (resultSet.next()) {
                 preparedStatement = connection.prepareStatement(
                         "DELETE FROM article WHERE id = ?"
+                );
+                preparedStatement.setInt(1, id);
+                preparedStatement.executeUpdate();
+
+                preparedStatement = connection.prepareStatement(
+                        "DELETE FROM tag_news_article WHERE article_id = ?"
                 );
                 preparedStatement.setInt(1, id);
                 preparedStatement.executeUpdate();
@@ -209,6 +218,246 @@ public class SqlArticleRepository extends MySqlAbstractRepository implements Art
 
     @Override
     public List<Article> getArticlesPage(Integer page) {
-        return null;
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+
+        ArrayList<Article> articles = new ArrayList<>();
+
+        try {
+            connection = newConnection();
+
+            preparedStatement = connection.prepareStatement(
+                    "SELECT * FROM article ORDER BY publish_date DESC LIMIT 5 OFFSET ?"
+            );
+            preparedStatement.setInt(1, (page - 1) * 5);
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                Article toAdd = new Article();
+                toAdd.setId(resultSet.getInt("id"));
+                toAdd.setCategoryId(resultSet.getInt("category_id"));
+                toAdd.setAuthorId(resultSet.getInt("author_id"));
+                toAdd.setVisits(resultSet.getInt("num_of_visits"));
+                toAdd.setPublishDate(resultSet.getDate("publish_date"));
+                toAdd.setContent(resultSet.getString("content"));
+                toAdd.setTitle(resultSet.getString("title"));
+
+                articles.add(toAdd);
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            closeStatement(preparedStatement);
+            closeResultSet(resultSet);
+            closeConnection(connection);
+        }
+
+        return articles;
+    }
+
+    @Override
+    public List<Article> getArticlesByCategoryPage(Integer categoryId, Integer page) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+
+        List<Article> articles = new ArrayList<>();
+
+        try {
+            connection = newConnection();
+
+            preparedStatement = connection.prepareStatement(
+                    "SELECT * FROM article WHERE category_id = ? ORDER BY publish_date DESC LIMIT 5 OFFSET ?"
+            );
+            preparedStatement.setInt(1, categoryId);
+            preparedStatement.setInt(2, (page - 1) * 5);
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                Article toAdd = new Article();
+                toAdd.setId(resultSet.getInt("id"));
+                toAdd.setCategoryId(resultSet.getInt("category_id"));
+                toAdd.setAuthorId(resultSet.getInt("author_id"));
+                toAdd.setVisits(resultSet.getInt("num_of_visits"));
+                toAdd.setPublishDate(resultSet.getDate("publish_date"));
+                toAdd.setContent(resultSet.getString("content"));
+                toAdd.setTitle(resultSet.getString("title"));
+
+                articles.add(toAdd);
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            closeStatement(preparedStatement);
+            closeResultSet(resultSet);
+            closeConnection(connection);
+        }
+
+        return articles;
+    }
+
+    @Override
+    public Integer countArticles(Integer catId, Integer tagId) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+
+        Integer count = 0;
+
+        try {
+            connection = newConnection();
+
+            if (catId == 0 && tagId == 0) {
+                preparedStatement = connection.prepareStatement(
+                        "SELECT COUNT(*) FROM article"
+                );
+            } else if (catId != 0 && tagId == 0) {
+                preparedStatement = connection.prepareStatement(
+                        "SELECT COUNT(*) FROM article WHERE category_id = ?"
+                );
+                preparedStatement.setInt(1, catId);
+            } else {
+                preparedStatement = connection.prepareStatement(
+                        "SELECT COUNT(*) FROM article INNER JOIN tag_news_article tna " +
+                                "ON article.id = tna.article_id WHERE tna.tag_id = ?"
+                );
+                preparedStatement.setInt(1, tagId);
+            }
+
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                count = resultSet.getInt(1);
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            closeStatement(preparedStatement);
+            closeResultSet(resultSet);
+            closeConnection(connection);
+        }
+        return count;
+    }
+
+    @Override
+    public List<Article> getArticlesByTagPage(Integer tagId, Integer page) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+
+        List<Article> articles = new ArrayList<>();
+
+        try {
+            connection = newConnection();
+
+            preparedStatement = connection.prepareStatement(
+                    "SELECT article.* FROM article " +
+                            "INNER JOIN tag_news_article tna on article.id = tna.article_id " +
+                            "WHERE tna.tag_id = ? ORDER BY article.publish_date DESC LIMIT 5 OFFSET ?"
+            );
+            preparedStatement.setInt(1, tagId);
+            preparedStatement.setInt(2, (page - 1) * 5);
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                Article toAdd = new Article();
+                toAdd.setId(resultSet.getInt("id"));
+                toAdd.setCategoryId(resultSet.getInt("category_id"));
+                toAdd.setAuthorId(resultSet.getInt("author_id"));
+                toAdd.setVisits(resultSet.getInt("num_of_visits"));
+                toAdd.setPublishDate(resultSet.getDate("publish_date"));
+                toAdd.setContent(resultSet.getString("content"));
+                toAdd.setTitle(resultSet.getString("title"));
+
+                articles.add(toAdd);
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            closeStatement(preparedStatement);
+            closeResultSet(resultSet);
+            closeConnection(connection);
+        }
+
+        return articles;
+    }
+
+    @Override
+    public List<Article> getMostRecentArticles() {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+
+        List<Article> articles = new ArrayList<>();
+
+        try {
+            connection = newConnection();
+
+            preparedStatement = connection.prepareStatement(
+                    "SELECT * FROM article ORDER BY publish_date DESC LIMIT 10"
+            );
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                Article toAdd = new Article();
+                toAdd.setId(resultSet.getInt("id"));
+                toAdd.setCategoryId(resultSet.getInt("category_id"));
+                toAdd.setAuthorId(resultSet.getInt("author_id"));
+                toAdd.setVisits(resultSet.getInt("num_of_visits"));
+                toAdd.setPublishDate(resultSet.getDate("publish_date"));
+                toAdd.setContent(resultSet.getString("content"));
+                toAdd.setTitle(resultSet.getString("title"));
+
+                articles.add(toAdd);
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            closeStatement(preparedStatement);
+            closeResultSet(resultSet);
+            closeConnection(connection);
+        }
+
+        return articles;
+    }
+
+    @Override
+    public List<Article> getMostReadMonthlyArticles() {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+
+        List<Article> articles = new ArrayList<>();
+
+        try {
+            connection = newConnection();
+
+            preparedStatement = connection.prepareStatement(
+                    "SELECT * FROM article WHERE publish_date BETWEEN DATE_SUB(NOW(), INTERVAL 30 DAY) " +
+                            "AND NOW() ORDER BY num_of_visits DESC LIMIT 10"
+            );
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                Article toAdd = new Article();
+                toAdd.setId(resultSet.getInt("id"));
+                toAdd.setCategoryId(resultSet.getInt("category_id"));
+                toAdd.setAuthorId(resultSet.getInt("author_id"));
+                toAdd.setVisits(resultSet.getInt("num_of_visits"));
+                toAdd.setPublishDate(resultSet.getDate("publish_date"));
+                toAdd.setContent(resultSet.getString("content"));
+                toAdd.setTitle(resultSet.getString("title"));
+
+                articles.add(toAdd);
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            closeStatement(preparedStatement);
+            closeResultSet(resultSet);
+            closeConnection(connection);
+        }
+
+        return articles;
     }
 }
